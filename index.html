@@ -1,0 +1,2328 @@
+<html>
+    <head>
+        <script type="module">
+            import "https://zimjs.org/cdn/017/zim_pizzazz"
+new Frame(FIT, 1200, 540, white, dark, ready)
+function ready(frame,  stage, stageW, stageH){
+  
+var zimAudioSpriteData={
+	src:"audioSprite.mp3",
+	audioSprite:[
+		['bullet', 3.6,3.8],
+		['explosion',0,3.5],
+		['clickSnd',4.4,4.52],
+		['explosion2',4.6,10.5],
+		['engine',11,15]
+	]
+}
+
+
+var assets = [
+  zimAudioSpriteData,
+  "sky.png","scoreBoard.png",
+"tree1.png","tree2.png","tree3.png","tree4.png","foxHead.png","parachute.png","take5.png","controlColumn.png",
+"bg1.png","bg2.png","bg3.png","bg4.png","bg5.png","letsGo.png","menuBG.png","year2But.png","year4But.png",
+"hseWhareHouse.png","hseTerrace1.png","hseTerrace2.png","hseTerrace3.png","hseChurch.png","goAgain.png",
+"hseFactory.png","hseGeorgian.png","hseTudor.png","bulletNumBG.png","scoreBG.png","roundel.png","spaceBar.png","arrowBG.png","keyboardNte.png",
+"airSpit.json","airSpit.png","spitfireRabbie.json","spitfireRabbie.png","me109.json","me109.png","blimp.png","carrotBullet.png","fireDown.png","fireUp.png",
+"explosion1.png","explosion2.png","explosion3.png","healthBar.png","smoke1.png","smoke2.png","smoke3.png"];
+var progress = new ProgressBar({barType:"rectangle", foregroundColor:"#ed2e2e",backgroundColor:"#ffffff",borderWidth:10});
+var path="https://raw.githubusercontent.com/karelrosseel/konijnvliegtschietwortels/master/";
+F.loadAssets(assets, path)
+  F.on("complete", ()=>{
+
+			var shell = new Container(W, H)
+			.addTo(stage);
+
+			var skyContainer= new Container();
+			skyContainer.name="skyContainer";
+			shell.addChild(skyContainer);
+
+			var bgContainer= new Container();
+			bgContainer.name="bgContainer";
+			shell.addChild(bgContainer);
+
+			var blimpContainer= new Container();
+			blimpContainer.name="blimpContainer";
+			shell.addChild(blimpContainer);
+
+			var buildingContainer= new Container();
+			buildingContainer.name="buildingContainer";
+			shell.addChild(buildingContainer);
+
+			var treeContainer= new Container();
+			treeContainer.name="treeContainer";
+			shell.addChild(treeContainer);
+
+			var bulletContainer= new Container();
+			bulletContainer.name="bulletContainer";
+			shell.addChild(bulletContainer);
+
+			var planeContainer= new Container();
+			planeContainer.name="planeContainer";
+			shell.addChild(planeContainer);
+
+			var uiContainer= new Container();
+			uiContainer.name="uiContainer";
+			shell.addChild(uiContainer);
+
+			var mathsContainer= new Container();
+			mathsContainer.name="mathsContainer";
+			shell.addChild(mathsContainer);
+
+			var timerContainer= new Container();
+			timerContainer.name="timerContainer";
+			shell.addChild(timerContainer);
+
+			var scoreContainer= new Container();
+			scoreContainer.name="scoreContainer";
+			shell.addChild(scoreContainer);
+			scoreContainer.visible=false;
+
+			var menuContainer= new Container();
+			menuContainer.name="menuContainer";
+			shell.addChild(menuContainer);
+
+
+
+
+
+
+			// var grid = new Grid(null,"#000000",false);
+			// shell.addChild(grid);
+
+
+				var bgY=325;
+				var treeArray;
+				var bgArray;
+				var hseArray;
+				var engineRunning=true;
+				var pressing=false;
+				var turn=0;
+				var divNum=35;
+				var currentX=0;
+				var currentY=0;
+				var lastX=0;
+				var lastY=0;
+				var animatingFlag=false;
+				var bulletArray=[];
+				var bulletNum=0;
+				var bulletsLeft=0;
+				var bulletStrength=20;
+				var scoreNum=0;
+				var gameRunning=true;
+				var myAnswer=0;
+				var correctAnswer;
+				var calcCorrectAnswer=0;
+				var currentArray=[];
+				var mistakesArray=[];
+				var calcNum=0;
+				var roundelNum=0;
+				var roundelArray=[];
+				var timeNum=6;
+				var stepTimer;
+				var sixSeconds;
+				var roundelTimer;
+				var submitTimer;
+				var blimpTextArray=[];
+				var numCorrectAns=0;
+				var ageGroup=0; //year2 or year 4
+				var endOfBulletsCalled=false;
+				var engineInterval;
+				var engineNoiseRunning;
+
+				if (mobile()) {
+				   var xDamp=10;
+					 var yDamp=4000;
+				}else{
+					var xDamp=25;
+					var yDamp=8000;
+				}
+
+				var q1Array=[
+					[6,3],[6,12],[6,4],
+					[7,2],[7,11],
+					[8,5],[8,2],[8,3],
+					[9,9],[9,6],[9,4],[9,5],
+					[12,9],[12,7],[12,12]
+					[11,10],[11,7],
+					[3,5],
+					[4,12],[4,9],
+					[5,8],[5,6],[5,11],
+					[2,9],
+					[10,7]
+				];
+				var q2Array=[
+					[6,2],[6,7],[6,9],[6,4],
+					[7,2],
+					[8,9],[8,3],[8,12],[8,5],
+					[9,11],[9,3],[9,7],[9,5],
+					[12,11],[12,5],[12,9],[12,10],
+					[11,4],
+					[3,7],[3,6],
+					[4,12],[5,3],[5,7],[2,9],[10,11]
+				];
+				var q3Array=[
+					[6,6],[6,7],
+					[7,5],[7,12],[7,11],
+					[8,7],[8,4],[8,3],[8,2],
+					[9,12],[9,4],
+					[12,8],[12,3],
+					[11,10],[11,9],
+					[3,6],[3,5],[3,9],
+					[4,2],[4,6],
+					[5,11],[5,9],
+					[2,10],[2,8],
+					[10,7]
+				];
+				var q4Array=[
+					[6,6],[6,3],[6,8],[6,5],
+					[7,9],[7,4],[7,2],
+					[8,7],[8,10],[8,9],[8,12],
+					[9,5],[9,11],
+					[12,4],[12,7],[12,3],
+					[11,12],[11,2],
+					[3,7],
+					[4,9],
+					[5,8],[5,12],
+					[4,11],[2,6],
+					[10,4]
+				];
+				var q5Array=[
+					[6,2],[6,5],
+					[7,3],[7,7],[7,8],[7,12],
+					[8,5],[8,12],[8,11],[8,3],
+					[9,2],[9,7],
+					[12,9],[12,4],[12,10],
+					[11,4],
+					[3,9],[3,6],[3,12],
+					[4,9],
+					[5,7],
+					[2,11],[2,5],
+					[10,8],[10,6]
+				];
+				var q6Array=[
+					[6,10],[6,2],[6,5],[6,11],
+					[7,12],[7,8],[7,6],
+					[8,8],[8,9],
+					[9,12],[9,6],[9,7],[9,11],
+					[12,3],[12,4],[12,5],[12,2],
+					[11,4],
+					[3,4],
+					[4,7],
+					[5,8],[5,7],
+					[2,9],[2,3],
+					[10,8]
+				];
+				var q7Array=[
+					[6,6],[6,12],
+					[7,8],[7,9],[7,11],
+					[8,6],[8,8],[8,3],[8,2],
+					[9,10],[9,9],
+					[12,4],[12,2],
+					[11,6],[11,5],[11,10],
+					[3,7],[3,12],
+					[4,7],[4,8],[4,5],
+					[5,6],[5,9],
+					[2,7],[2,3]
+				];
+				var q8Array=[
+					[6,8],[6,12],[6,5],
+					[7,6],[7,8],
+					[8,9],
+					[9,7],[9,6],[9,12],[9,4],
+					[12,3],[12,5],[12,7],[12,8],
+					[11,8],
+					[3,4],
+					[4,6],[4,7],[4,2],
+					[5,7],[5,3],
+					[2,8],[2,9],
+					[10,9],[10,12]
+				];
+				var q9Array=[
+					[6,8],[6,9],[6,12],
+					[7,9],[7,11],[7,4],[7,2],
+					[8,12],[8,3],[8,4],[8,5],
+					[9,10],[9,2],[9,5],
+					[12,7],
+					[11,10],
+					[3,7],[3,3],[3,12],
+					[4,9],
+					[5,12],[5,4],
+					[2,8],[2,6],
+					[10,6]
+				];
+				var q10Array=[
+					[6,7],[6,8],[6,9],[6,12],
+					[7,7],[7,9],[7,4],[7,2],
+					[8,3],[8,4],
+					[9,8],[9,9],[9,2],[9,12],
+					[12,8],[12,7],
+					[11,6],[11,11],[11,5],
+					[3,6],
+					[4,6],
+					[5,10],
+					[2,12],
+					[10,3],[10,11]
+				];
+				var q11Array=[
+					[6,6],[6,7],[6,8],[6,9],
+					[7,5],[7,12],
+					[8,7],[8,8],[8,11],[8,3],
+					[9,7],[9,10],
+					[12,9],[12,3],[12,4],
+					[11,6],
+					[3,6],[3,4],
+					[4,5],
+					[5,8],[5,9],
+					[2,2],[2,9],
+					[10,11],[10,12]
+
+				];
+				var q12Array=[
+					[6,6],[6,7],
+					[7,8],[7,5],[7,2],[7,9],
+					[8,9],[8,12],
+					[9,3],[9,4],[9,12],[9,6],
+					[12,3],[12,7],
+					[11,11],[11,9],
+					[3,8],[3,4],[3,2],
+					[4,6],
+					[5,5],[5,9],
+					[2,8],
+					[10,7],[10,8]
+				];
+				var q13Array=[
+					[6,4],[6,12]
+					[7,9],[7,7],[7,10],
+					[8,3],[8,6],[8,7],[8,5],
+					[9,6],[9,8],[9,9],
+					[12,3],[12,2],[12,10],
+					[11,9],[11,6],
+					[3,11],[3,5],
+					[4,7],[4,9],
+					[5,6],[5,12],
+					[2,10],[2,2]
+				];
+				var q14Array=[
+					[6,7],[6,8],[6,2],
+					[7,12],[7,4],[7,5],[7,11],
+					[8,8],[8,3],[8,7],
+					[9,9],[9,6],[9,8],[9,3],
+					[12,6],[12,4],[12,10],
+					[11,6],
+					[3,6],[3,7],[3,4],
+					[4,5],
+					[5,12],
+					[2,9],
+					[10,9]
+				];
+				var q15Array=[
+					[6,10],[6,7],[6,12],[6,11],
+					[7,10],[7,5],[7,3],
+					[8,9],[8,4],
+					[9,5],[9,2],[9,6],[9,3],
+					[12,8],[12,5],[12,2],
+					[11,4],[11,7],
+					[3,4],
+					[4,7],[4,5],
+					[5,8],
+					[2,9],[2,8],
+					[10,11]
+				];
+
+				var q16Array=[
+					[6,7],[6,9],
+					[7,8],[7,5],[7,12],[7,11],
+					[8,6],[8,3],[8,5],[8,10],
+					[9,3],[9,8],
+					[12,4],[12,2],[12,6],[12,8],
+					[11,2],
+					[3,10],[3,6],[3,4],
+					[4,7],
+					[5,5],
+					[2,2],[2,9],
+					[10,6]
+				];
+
+				var q17Array=[
+					[6,4],[6,5],
+					[7,2],[7,10],[7,11],
+					[8,6],[8,7],[8,8],[8,4],
+					[9,6],[9,8],[9,12],[9,9],
+					[12,3],[12,10],
+					[11,8],
+					[3,5],
+					[4,2],[4,9],
+					[5,7],[5,4],[5,9],
+					[2,3],[2,6],
+					[10,12]
+				];
+				var q18Array=[
+					[6,6],[6,7],[6,8],[6,12],
+					[7,2],[7,5],
+					[8,11],[8,3],[8,4],[8,9],
+					[9,12],[9,7],[9,3],[9,5],
+					[12,5],[12,2],
+					[11,7],
+					[3,6],[3,7],
+					[4,4],
+					[5,12],
+					[2,6],[2,10],
+					[10,8],[10,9]
+				];
+				var q19Array=[
+					[6,7],[6,9],[6,4],
+					[7,8],[7,6],[7,2],
+					[8,6],[8,8],[8,3],
+					[9,2],[9,5],[9,10],
+					[12,12],[12,6],[12,9],[12,3],
+					[11,7],
+					[3,6],[3,9],
+					[4,11],
+					[5,7],
+					[2,9],[2,4],
+					[10,7],[10,5]
+				];
+				var q20Array=[
+					[6,12],[6,5],
+					[7,3],[7,8],[7,6],[7,9],
+					[8,11],[8,4],[8,10],[8,9],
+					[9,6],[9,12],
+					[12,8],[12,4],
+					[11,2],
+					[3,6],[3,8],[3,9],
+					[4,7],[4,6],[4,5],
+					[5,7],[5,10],
+					[2,6],[2,7]
+				];
+				var q21Array=[
+					[6,9],[6,2],
+					[7,6],[7,12],
+					[8,6],[8,11],[8,2],[8,9],
+					[9,7],[9,12],[9,4],[9,10],
+					[12,6],[12,3],[12,5],[12,6],
+					[11,4],[11,10],
+					[3,2],
+					[4,8],[4,6],
+					[5,8],[5,9],
+					[10,5],[10,6]
+				];
+				var q22Array=[
+					[6,7],[6,12],[6,5],[6,2],
+					[7,8],[7,12],[7,4],[7,10],
+					[8,6],[8,9],
+					[9,3],[9,6],
+					[12,10],[12,2],
+					[11,11],
+					[3,3],[3,6],[3,7],
+					[4,8],[4,9],
+					[5,5],[5,3],[5,8],
+					[10,11],[10,9]
+				];
+				var q23Array=[
+					[6,7],[6,8],[6,12],
+					[7,8],[7,3],
+					[8,11],[8,5],[8,3],[8,4],
+					[9,9],[9,4],[9,12],
+					[12,7],[12,8],
+					[11,5],[11,6],
+					[3,3],[3,9],
+					[4,2],
+					[5,6],[5,7],
+					[2,9],[2,10],
+					[10,11],[10,10]
+				];
+				var q24Array=[
+					[6,7],[6,3],[6,4],[6,2],
+					[7,8],[7,5],
+					[8,12],[8,6],[8,5],
+					[9,9],[9,3],[9,7],
+					[12,2],[12,7],[12,3],[12,6],
+					[11,11],
+					[3,10],[3,8],
+					[4,12],[4,11],
+					[5,5],
+					[2,9],[2,8],
+					[10,6]
+				];
+				var q25Array=[
+					[6,8],[6,10],[6,7],[6,4],
+					[7,8],[7,9],[7,3],[7,5],
+					[8,5],[8,2],
+					[9,9],[9,3],[9,12],[9,6],
+					[12,12],[12,7],
+					[11,6],[11,8],
+					[3,4],[3,6],
+					[4,8],[4,5],
+					[2,6],
+					[10,11],[10,12]
+				];
+				var q26Array=[
+					[6,12],[6,5],
+					[7,11],[7,10],[7,9],[7,6],
+					[8,3],[8,4],
+					[9,12],[9,2],[9,8],[9,5],
+					[12,10],[12,7],
+					[11,3],
+					[3,6],[3,7],[3,9],
+					[4,9],[4,11],
+					[5,8],[5,2],
+					[2,6],[2,5],
+					[10,8]
+				];
+				var q27Array=[
+					[6,9],[6,12],[6,8],
+					[7,4],[7,5],
+					[8,8],[8,9],[8,4],[8,2],
+					[9,11],[9,3],[9,5],[9,10],
+					[12,12],[12,5],
+					[11,6],
+					[3,2],[3,7],[3,8],
+					[4,6],[4,12],
+					[5,3],[5,8],
+					[2,7],
+					[10,11]
+				];
+				var q28Array=[
+					[6,7],[6,10],
+					[7,9],[7,3],[7,4],[7,12],
+					[8,6],[8,11],[8,5],[8,4],
+					[9,6],[9,7],
+					[12,3],[12,5]
+					[11,9],
+					[3,8],[3,2],[3,9],
+					[4,2],[4,6],
+					[5,8],[5,3],
+					[2,12],
+					[10,11],[10,9]
+				];
+				var q29Array=[
+					[6,2],[6,3],[6,4],[6,10],
+					[7,12],[7,11],[7,5],
+					[8,6],[8,7],
+					[9,12],[9,8],
+					[12,2],[12,4],
+					[11,8],[11,5],[11,9],
+					[3,9],
+					[4,7],[4,9],[4,8],
+					[5,6],[5,12],
+					[2,9],[2,7],
+					[10,11]
+				];
+				var q30Array=[
+					[6,2],[6,12],
+					[7,8],[7,3],[7,9],[7,5],
+					[8,4],[8,6],
+					[9,6],[9,4],[9,3],
+					[12,11],[12,7],[12,5],
+					[11,7],[11,10],
+					[3,12],[3,8],[3,5],
+					[4,6],[4,7],
+					[5,9],
+					[2,11],[2,12],
+					[10,8]
+				];
+				var allTablesArray=[q1Array,q2Array,q3Array,q4Array,q5Array,
+					q6Array,q7Array,q8Array,q9Array,q10Array,q11Array,q12Array,q13Array,
+					q14Array,q15Array,q16Array,q17Array,q18Array,q19Array,q20Array,q21Array,
+					q22Array,q23Array,q24Array,q25Array,q26Array,q27Array,q28Array,q29Array,
+					q30Array];
+
+				var ks1Array1=[
+					[2,2],[2,3],[2,4],[2,5],
+					[2,6],[2,7],[2,8],[2,9],
+					[5,2],[5,3],
+					[2,10],[2,12],
+					[5,5],[5,6],
+					[5,7],[5,8],
+					[5,9],[5,11],
+					[5,12],
+					[10,2],[10,3],
+					[10,4],[10,5],
+					[10,6],[10,9]
+				];
+
+				var ks1Array2=[
+					[2,5],[2,7],[2,8],[2,9],
+					[2,10],[2,11],[2,12],[2,3],
+					[5,5],[5,6],
+					[2,2],[2,4],
+					[5,7],[5,9],
+					[5,10],[5,2],
+					[5,11],[5,12],
+					[5,3],
+					[10,4],[10,5],
+					[10,6],[10,7],
+					[10,8],[10,9]
+				];
+				var ks1Array3=[
+					[2,3],[2,4],[2,5],[2,7],
+					[2,8],[2,9],[2,11],[2,12],
+					[5,3],[5,4],
+					[2,2],[2,10],
+					[5,5],[5,6],
+					[5,7],[5,8],
+					[5,9],[5,10],
+					[5,11],
+					[10,2],[10,3],
+					[10,4],[10,7],
+					[10,8],[10,12]
+				];
+				var ks1Array4=[
+					[2,2],[2,3],[2,5],[2,6],
+					[2,7],[2,8],[2,9],[2,11],
+					[2,10],[2,4],
+					[5,3],[5,4],
+					[5,6],[5,7],
+					[5,8],[5,9],
+					[5,11],[5,12],
+					[10,2],
+					[10,5],[10,6],
+					[10,7],[10,8],
+					[10,9],[10,12]
+				];
+				var allKS1TablesArray=[ks1Array1,ks1Array2,ks1Array3,ks1Array4];
+
+				var menuBG= new Pic("menuBG.png");
+				menuBG.scaleX=menuBG.scaleY=.75;
+				menuBG.x=-75;
+				menuBG.y=-25;
+				menuContainer.addChild(menuBG);
+
+				var year2But= new Pic("year2But.png");
+				year2But.scaleX=year2But.scaleY=.75;
+				year2But.x=775;
+				year2But.y=185;
+				menuContainer.addChild(year2But);
+				year2But.cursor="pointer";
+
+				var year4But= new Pic("year4But.png");
+				year4But.scaleX=year4But.scaleY=.75;
+				year4But.x=775;
+				year4But.y=335;
+				menuContainer.addChild(year4But);
+				year4But.cursor="pointer";
+
+				var scoreBoard= new Pic("scoreBoard.png");
+				scoreContainer.addChild(scoreBoard);
+
+				var mistakeWindow = new Window({
+				   width:255,
+					 height:425,
+					 backgroundColor :clear,
+					 borderWidth :0,
+				   interactive:true,
+				   padding:5,
+					 swipe:"horizontal",
+					 scrollBarDrag:true
+				});
+				mistakeWindow.x=465;
+				mistakeWindow.y=75;
+				scoreContainer.addChild(mistakeWindow);
+				var mistakeLabel = new Label({
+				   text:"",
+					 backgroundColor:null,
+					 backing:null,
+					 color:"#8c6239",
+					 align:"center",
+					 font:"childFriendly",
+					 size:45
+				});
+				mistakeLabel.x=125;
+				mistakeWindow.addChild(mistakeLabel);
+
+				var me109DnLabel = new Label({
+				   text:"0",
+					 backgroundColor:null,
+					 backing:null,
+					 color:"#8c6239",
+					 align:"center",
+					 font:"childFriendly",
+					 size:65
+				});
+				me109DnLabel.x=1010;
+				me109DnLabel.y=125;
+				scoreContainer.addChild(me109DnLabel);
+
+
+				var finalScoreLabel = new Label({
+				   text:"0",
+					 backgroundColor:null,
+					 backing:null,
+					 color:"#8c6239",
+					 align:"center",
+					 font:"childFriendly",
+					 size:85
+				});
+				finalScoreLabel.x=865;
+				finalScoreLabel.y=315;
+				scoreContainer.addChild(finalScoreLabel);
+
+				var goAgain= new Pic("goAgain.png");
+				goAgain.scaleX=goAgain.scaleY=.5;
+				goAgain.x=1065;
+				goAgain.y=235;
+				scoreContainer.addChild(goAgain);
+				goAgain.cursor="pointer";
+
+				var labelTextArray=[1,2,3,4,5,6,7,8,9,"⌫",0,"Enter"];
+				var buttonArray=[];
+				var label = new Label({
+				   text:"",
+				   size:45
+				});
+				//label.enabled=false;
+				var button = new Button({
+				   label:label,
+				   width:125,
+				   height:95,
+				   backgroundColor:"#aaaaaa",
+				   rollBackgroundColor:"#bbbbbb",
+					 shadowBlur:0,
+				   corner:2
+				});
+				button.myValue=1;
+				var keyBoardBG = new Rectangle({width:1200, height:540, color:"#ffffff"});
+				var answerYellowBG = new Rectangle({width:395, height:105,borderWidth:10, color:"#ffffff",borderColor:"#f9bb49"});
+				var answerBG = new Rectangle({width:385, height:95,borderWidth:2, color:"#ffffff",borderColor:"#000000"});
+				var roundelBG=new Rectangle({width:1200, height:540, color:"#ffffff"});
+
+				//var timeNumLabelBG=keyBoardBG.clone();
+				timerContainer.addChild(roundelBG);
+
+				var roundel= new Pic("roundel.png");
+				roundel.cache(0,0,roundel.width,roundel.height);
+				roundel.scaleX=roundel.scaleY=1;
+				roundel.x=395;
+				roundel.y=185;
+				timerContainer.addChild(roundel);
+
+				var roundel2=roundel.clone();
+				roundel2.x=roundel.x+roundel.width+25;
+				roundel2.y=roundel.y;
+				timerContainer.addChild(roundel2);
+
+				var roundel3=roundel.clone();
+				roundel3.x=roundel2.x+roundel2.width+25;
+				roundel3.y=roundel.y;
+				timerContainer.addChild(roundel3);
+
+				var letsGo= new Pic("letsGo.png");
+				letsGo.cache(0,0,letsGo.width,letsGo.height);
+				letsGo.scaleX=letsGo.scaleY=1;
+				letsGo.x=-125;
+				letsGo.y=325;
+				timerContainer.addChild(letsGo);
+				letsGo.visible=false;
+
+				var take5= new Pic("take5.png");
+				take5.cache(0,0,take5.width,take5.height);
+				take5.scaleX=take5.scaleY=.85;
+				take5.x=10;
+				take5.y=225;
+				timerContainer.addChild(take5);
+				take5.visible=false;
+
+				roundelArray=[roundel,roundel2,roundel3];
+				for(var numBut=0; numBut<12; numBut++){
+					var tempButton=button.clone();
+					tempButton.text=labelTextArray[numBut];
+					tempButton.myValue=numBut+1;
+					if((numBut==9)||(numBut==11)){
+						tempButton.backgroundColor="#666666";
+ 				   	tempButton.rollBackgroundColor="#777777";
+						tempButton.color="#ffffff";
+					}
+					buttonArray.push(tempButton);
+				};
+				for(var buttonCnt=0; buttonCnt<12; buttonCnt++){
+					buttonArray[buttonCnt].myValue=buttonCnt+1;
+					buttonArray[buttonCnt].on("click", (e)=> {
+						new Aud("clickSnd").play();
+						if((e.currentTarget.myValue<10)&&(e.currentTarget.myValue>0)){
+							myAnswer*=10;
+							myAnswer+=e.currentTarget.myValue;
+							mathsAnswerLabel.text=myAnswer;
+						}else if(e.currentTarget.myValue==11){
+							myAnswer*=10;
+							mathsAnswerLabel.text=myAnswer;
+						}else if(e.currentTarget.myValue==10){
+							var tempAnswer=Math.floor(myAnswer/10);
+							myAnswer=tempAnswer;
+							mathsAnswerLabel.text=myAnswer;
+						}else if(e.currentTarget.myValue==12){
+							if(stepTimer){
+								stepTimer.clear();
+							}
+							if(sixSeconds){
+								sixSeconds.clear();
+							}
+
+							submitAnswer(myAnswer);
+						}
+						stage.update();
+					});
+				};
+				var tile = new Tile({
+					obj:series(buttonArray),
+					cols:3,
+					rows:4,
+					spacingH:10,
+					spacingV:10,
+					count:buttonArray.length,
+					clone:false
+				});
+				tile.x=475;
+				tile.y=125;
+				mathsContainer.addChild(keyBoardBG);
+
+				var keyboardNte= new Pic("keyboardNte.png");
+				keyboardNte.scaleX=keyboardNte.scaleY=.6;
+				keyboardNte.x=25;
+				keyboardNte.y=495;
+				mathsContainer.addChild(keyboardNte);
+
+				var mathScoreLabel = new Label({
+				   text:"questions answered: 0 / 25",
+				   size:20,
+					 font:"childFriendly",
+					 align:"center",
+					 color:"#ffffff"
+				});
+				mathScoreLabel.x=275;
+				mathScoreLabel.y=15;
+				uiContainer.addChild(mathScoreLabel);
+
+				var mathsFactLabel = new Label({
+				   text:"4 × 3 =",
+				   size:75,
+					 align:"right"
+				});
+				mathsFactLabel.x=445;
+				mathsFactLabel.y=30;
+				mathsContainer.addChild(mathsFactLabel);
+
+				var mathsAnswerLabel = new Label({
+				   text:"",
+				   size:75,
+					 align:"right"
+				});
+				mathsAnswerLabel.x=840;
+				mathsAnswerLabel.y=answerBG.y+30;
+
+				answerYellowBG.x=tile.x;
+				answerYellowBG.y=tile.y-(answerYellowBG.height+10);
+				answerBG.x=answerYellowBG.x+5;
+				answerBG.y=answerYellowBG.y+5;
+
+				var timeleftLabel = new Label({
+				   text:"Time left:",
+				   size:25,
+					 align:"left",
+					 color:"#aaaaaa"
+				});
+				timeleftLabel.x=975;
+				timeleftLabel.y=125;
+				var timeNumLabel = new Label({
+				   text:timeNum,
+				   size:25,
+					 align:"left",
+					 color:"#aaaaaa"
+				});
+				timeNumLabel.x=timeleftLabel.x+timeleftLabel.width+10;
+				timeNumLabel.y=timeleftLabel.y;
+
+				mathsContainer.addChild(tile);
+				mathsContainer.addChild(answerYellowBG);
+				mathsContainer.addChild(answerBG);
+				mathsContainer.addChild(mathsAnswerLabel);
+				mathsContainer.addChild(timeleftLabel);
+				mathsContainer.addChild(timeNumLabel);
+
+
+
+
+
+				var smokeCircle = new Circle({radius:5, color:"#6d6d6d"});
+
+
+				var arrowBG= new Pic("arrowBG.png");
+				arrowBG.scaleX=arrowBG.scaleY=.7;
+				arrowBG.x=965;
+				arrowBG.y=325;
+				uiContainer.addChild(arrowBG);
+
+				//var controlColumn = new Circle({radius:75, color:"#ff0000"});
+				var controlColumn= new Pic("controlColumn.png");
+				controlColumn.scaleX=controlColumn.scaleY=1;
+				controlColumn.reg(controlColumn.width/2,controlColumn.height/2);
+				controlColumn.x=1100;
+				controlColumn.y=440;
+				uiContainer.addChild(controlColumn);
+				var rect = new Rectangle(200,200);
+				rect.x=1000;
+				rect.y=340;
+				controlColumn.drag(rect);
+
+				var smoke1= new Pic("smoke1.png");
+				smoke1.cache(0,0,smoke1.width,smoke1.height);
+				smoke1.scaleX=smoke1.scaleY=.01;
+				smoke1.reg(smoke1.width/2,smoke1.height/2);
+
+				var smoke2= new Pic("smoke2.png");
+				smoke2.cache(0,0,smoke2.width,smoke2.height);
+				smoke2.scaleX=smoke2.scaleY=.01;
+				smoke2.reg(smoke2.width/2,smoke2.height/2);
+
+				var smoke3= new Pic("smoke3.png");
+				smoke3.cache(0,0,smoke3.width,smoke3.height);
+				smoke3.scaleX=smoke3.scaleY=.01;
+				smoke3.reg(smoke3.width/2,smoke3.height/2);
+
+				var bulletNumBG= new Pic("bulletNumBG.png");
+				bulletNumBG.cache(0,0,bulletNumBG.width,bulletNumBG.height);
+				bulletNumBG.scaleX=bulletNumBG.scaleY=.6;
+				bulletNumBG.x=165;
+				bulletNumBG.y=455;
+				uiContainer.addChild(bulletNumBG);
+
+				var bulletDialLabel = new Label({
+					 text:bulletsLeft,
+					 size:30,
+					 font:"childFriendly",
+					 color:"#000000",
+					 align:"right"
+				});
+				bulletDialLabel.x=250;
+				bulletDialLabel.y=510;
+				uiContainer.addChild(bulletDialLabel);
+
+				var scoreBG= new Pic("scoreBG.png");
+				scoreBG.cache(0,0,scoreBG.width,scoreBG.height);
+				scoreBG.scaleX=scoreBG.scaleY=.6;
+				scoreBG.x=320;
+				scoreBG.y=435;
+				uiContainer.addChild(scoreBG);
+
+				var scoreDialLabel = new Label({
+					 text:scoreNum,
+					 size:30,
+					 font:"childFriendly",
+					 color:"#000000",
+					 align:"center"
+				});
+				scoreDialLabel.x=385;
+				scoreDialLabel.y=510;
+				uiContainer.addChild(scoreDialLabel);
+
+				var carrotBullet= new Pic("carrotBullet.png");
+				carrotBullet.cache(0,0,carrotBullet.width,carrotBullet.height);
+				carrotBullet.scaleX=carrotBullet.scaleY=.2;
+
+				var carrotOne=carrotBullet.clone();
+				carrotOne.scaleX=carrotOne.scaleY=.55;
+				carrotOne.alpha=.1;
+				carrotOne.x=975;
+				carrotOne.y=450;
+				mathsContainer.addChild(carrotOne);
+
+				var carrotTwo=carrotOne.clone();
+				carrotTwo.x=carrotOne.x;
+				carrotTwo.y=carrotOne.y-carrotOne.height-15;
+				mathsContainer.addChild(carrotTwo);
+
+				var carrotThree=carrotOne.clone();
+				carrotThree.x=carrotOne.x;
+				carrotThree.y=carrotTwo.y-carrotTwo.height-15;
+				mathsContainer.addChild(carrotThree);
+
+				var carrotFour=carrotOne.clone();
+				carrotFour.x=carrotOne.x;
+				carrotFour.y=carrotThree.y-carrotThree.height-15;
+				mathsContainer.addChild(carrotFour);
+
+				var carrotFive=carrotOne.clone();
+				carrotFive.x=carrotOne.x;
+				carrotFive.y=carrotFour.y-carrotFour.height-15;
+				mathsContainer.addChild(carrotFive);
+
+				var carrotArray=[carrotOne,carrotTwo,carrotThree,carrotFour,carrotFive];
+				var qNum=0;
+			 var fireDown = new Pic("fireDown.png");
+			 fireDown.cache(0,0,fireDown.width,fireDown.height);
+			 fireDown.scaleX=fireDown.scaleY=.35;
+			 fireDown.x=5;
+			 fireDown.y=375;
+			 uiContainer.addChild(fireDown);
+
+			 var fireUp = new Pic("fireUp.png");
+			 fireUp.cache(0,0,fireUp.width,fireUp.height);
+			 fireUp.scaleX=fireUp.scaleY=.35;
+			 fireUp.x=5;
+			 fireUp.y=375;
+			 uiContainer.addChild(fireUp);
+
+			 var spaceBar = new Pic("spaceBar.png");
+			 spaceBar.cache(0,0,spaceBar.width,spaceBar.height);
+			 spaceBar.scaleX=spaceBar.scaleY=.75;
+			 spaceBar.x=50;
+			 spaceBar.y=425;
+			 uiContainer.addChild(spaceBar);
+
+				var sky = new Pic("sky.png");
+				sky.cache(0,0,sky.width,sky.height);
+				sky.scaleX=1.25;
+				sky.scaleY=1.45;
+				sky.x=-10;
+				sky.y=-5;
+				skyContainer.addChild(sky);
+
+				var bg1 = new Pic("bg1.png");
+				bg1.cache(0,0,bg1.width,bg1.height);
+				bg1.scaleX=bg1.scaleY=.45;
+				bg1.y=bgY+10+25;
+
+				var bg2 = new Pic("bg2.png");
+				bg2.cache(0,0,bg2.width,bg2.height);
+				bg2.scaleX=bg2.scaleY=.45;
+				bg2.y=bgY+25;
+
+				var bg3 = new Pic("bg3.png");
+				bg3.cache(0,0,bg3.width,bg3.height);
+				bg3.scaleX=bg3.scaleY=.45;
+				bg3.y=bgY+25;
+
+				var bg4 = new Pic("bg4.png");
+				bg4.cache(0,0,bg4.width,bg4.height);
+				bg4.scaleX=bg4.scaleY=.45;
+				bg4.y=bgY-90+25;
+
+				var bg5 = new Pic("bg5.png");
+				bg5.cache(0,0,bg5.width,bg5.height);
+				bg5.scaleX=bg5.scaleY=.45;
+				bg5.y=bgY+25;
+
+				bgArray =[bg1,bg2,bg3,bg4,bg5];
+
+				var hse1 = new Pic("hseWhareHouse.png");
+				hse1.cache(0,0,hse1.width,hse1.height);
+				hse1.scaleX=hse1.scaleY=.5;
+				hse1.y=bgY-35;
+
+				var hse2 = new Pic("hseTerrace1.png");
+				hse2.cache(0,0,hse2.width,hse2.height);
+				hse2.scaleX=hse2.scaleY=.4;
+				hse2.y=bgY+75;
+
+				var hse3 = new Pic("hseTerrace2.png");
+				hse3.cache(0,0,hse3.width,hse3.height);
+				hse3.scaleX=hse3.scaleY=.4;
+				hse3.y=bgY+75;
+
+				var hse4 = new Pic("hseTerrace3.png");
+				hse4.cache(0,0,hse4.width,hse4.height);
+				hse4.scaleX=hse4.scaleY=.4;
+				hse4.y=bgY+75;
+
+				var hse5 = new Pic("hseChurch.png");
+				hse5.cache(0,0,hse5.width,hse5.height);
+				hse5.scaleX=hse5.scaleY=.5;
+				hse5.y=bgY-90;
+
+				var hse6 = new Pic("hseFactory.png");
+				hse6.cache(0,0,hse6.width,hse6.height);
+				hse6.scaleX=hse6.scaleY=.4;
+				hse6.y=bgY-15;
+
+				var hse7= new Pic("hseGeorgian.png");
+				hse7.cache(0,0,hse7.width,hse7.height);
+				hse7.scaleX=hse7.scaleY=.4;
+				hse7.y=bgY-25;
+
+				var hse8 = new Pic("hseTudor.png");
+				hse8.cache(0,0,hse8.width,hse8.height);
+				hse8.scaleX=hse8.scaleY=.4;
+				hse8.y=bgY+25;
+
+				hseArray=[hse1,hse2,hse3,hse4,hse5,hse6,hse7,hse8];
+
+				var tree1 = new Pic("tree1.png");
+				tree1.cache(0,0,tree1.width,tree1.height);
+				tree1.scaleX=tree1.scaleY=.65;
+				tree1.y=bgY+45;
+
+				var tree2 = new Pic("tree2.png");
+				tree2.cache(0,0,tree2.width,tree2.height);
+				tree2.scaleX=tree2.scaleY=.65;
+				tree2.y=bgY+25;
+
+				var tree3 = new Pic("tree3.png");
+				tree3.cache(0,0,tree3.width,tree3.height);
+				tree3.scaleX=tree3.scaleY=.55;
+				tree3.y=bgY+25;
+
+				var tree4 = new Pic("tree4.png");
+				tree4.cache(0,0,tree4.width,tree4.height);
+				tree4.scaleX=tree4.scaleY=.55;
+				tree4.y=bgY-25;
+
+				treeArray=[tree1,tree2,tree3,tree4];
+
+				var blimp = new Pic("blimp.png");
+				blimp.cache(0,0,blimp.width,blimp.height);
+				blimp.scaleX=blimp.scaleY=.45;
+
+				var blimpMistakeText = new Label({
+				   text:"",
+				   size:25,
+					 align:"left",
+					 color:"#ffffff",
+					 backgroundColor:"#bababa",
+					 backgroundBorderColor:"#bababa",
+					 backgroundBorderWidth:2,
+					 corner:5,
+					 paddingVertical:5
+				});
+
+				var spitfireAnim = new Sprite({json:asset("spitfireRabbie.json")});
+				spitfireAnim.scaleX = spitfireAnim.scaleY =.3;
+				spitfireAnim.y=145;
+				spitfireAnim.x=145;
+				planeContainer.addChild(spitfireAnim);
+				spitfireAnim.run({	label:[
+				{label:"flyLevel"}],loop:false});
+				////////me109//////////////////////////////
+				var foxHead= new Pic("foxHead.png");
+				foxHead.cache(0,0,foxHead.width,foxHead.height);
+				foxHead.scaleX=foxHead.scaleY=.45;
+				var healthRect = new Rectangle({width:77, height:5, color:"#24ce30", corner:2});
+				var me109Anim = new Sprite({json: asset("me109.json")});
+				me109Anim.scaleX = me109Anim.scaleY =.3;
+				me109Anim.available=true;
+				me109Anim.y=145;
+				me109Anim.x=845;
+				me109Anim.health=100;
+				me109Anim.myFox=foxHead;
+				me109Anim.myNum=1;
+				me109Anim.myHealthBar=healthRect;
+				planeContainer.addChild(me109Anim);
+				planeContainer.addChild(foxHead);
+				// me109Anim.run({	label:[
+				// {label:"flyLevel"}],loop:false});
+				me109Anim.gotoAndStop(0);
+
+
+
+				var parachute=  new Pic("parachute.png");
+				parachute.cache(0,0,parachute.width,parachute.height);
+				parachute.scaleX=parachute.scaleY=.45;
+
+
+				var healthBarBG= new Pic("healthBar.png");
+	 			 healthBarBG.cache(0,0,healthBarBG.width,healthBarBG.height);
+	 			 healthBarBG.scaleX=healthBarBG.scaleY=.55;
+	 			 healthBarBG.x=me109Anim.x+10;
+	 			 healthBarBG.y=me109Anim.y+30;
+	 			 planeContainer.addChild(healthBarBG);
+				planeContainer.addChild(healthRect);
+				///////////////////////////////////////
+				////////me109//////////////////////////////
+				var foxHead2= foxHead.clone();
+				var healthRect2 = new Rectangle({width:77, height:5, color:"#24ce30", corner:2});
+				var me109Anim2 = me109Anim.clone();
+				me109Anim2.available=true;
+				me109Anim2.y=zim.rand(75,500);
+				me109Anim2.x=zim.rand(1200,2000);
+				me109Anim2.health=100;
+				me109Anim2.myFox=foxHead2;
+				me109Anim2.myNum=2;
+				me109Anim2.myHealthBar=healthRect2;
+				planeContainer.addChild(me109Anim2);
+				planeContainer.addChild(foxHead2);
+				me109Anim2.run({	label:[
+				{label:"flyLevel"}],loop:false});
+
+
+
+				// var parachute2= parachute.clone();
+				// parachute2.visible=false;
+				// planeContainer.addChild(parachute2);
+
+				var healthBar2BG=healthBarBG.clone();
+	 			 healthBar2BG.x=me109Anim2.x+10;
+	 			 healthBar2BG.y=me109Anim2.y+30;
+	 			 planeContainer.addChild(healthBar2BG);
+
+
+				planeContainer.addChild(healthRect2);
+				///////////////////////////////////////
+				////////me109//////////////////////////////
+				var foxHead3= foxHead.clone();
+				var healthRect3 = new Rectangle({width:77, height:5, color:"#24ce30", corner:2});
+				var me109Anim3 = me109Anim.clone();
+				me109Anim3.available=true;
+				me109Anim3.y=zim.rand(.075,.500); // 75, 500 milliseconds
+				me109Anim3.x=zim.rand(1.200,2.000); // 1200 , 2000 milliseconds
+				me109Anim3.health=100;
+				me109Anim3.myFox=foxHead3;
+				me109Anim3.myNum=3;
+				me109Anim3.myHealthBar=healthRect3;
+				planeContainer.addChild(me109Anim3);
+				planeContainer.addChild(foxHead3);
+				me109Anim3.run({	label:[
+				{label:"flyLevel"}],loop:false});
+
+
+
+				// var parachute2= parachute.clone();
+				// parachute2.visible=false;
+				// planeContainer.addChild(parachute2);
+
+				var healthBar3BG=healthBarBG.clone();
+	 			healthBar3BG.x=me109Anim3.x+10;
+	 			healthBar3BG.y=me109Anim3.y+30;
+	 			planeContainer.addChild(healthBar3BG);
+				planeContainer.addChild(healthRect3);
+				///////////////////////////////////////
+
+				var explosion1 = new Pic("explosion1.png");
+				var colsExp1 =6;
+				var rowsExp1 = 1;
+				explosion1.cache(0,0,explosion1.width,explosion1.height);
+				var explosion1Anim = new Sprite(explosion1,colsExp1,rowsExp1);
+				explosion1Anim.scaleX = explosion1Anim.scaleY =2.25;
+				explosion1Anim.gotoAndStop(0);
+
+				var explosion2 = new Pic("explosion2.png");
+				var colsExp2 =6;
+				var rowsExp2 = 1;
+				explosion2.cache(0,0,explosion2.width,explosion2.height);
+				var explosion2Anim = new Sprite(explosion2,colsExp2,rowsExp2);
+				explosion2Anim.scaleX = explosion2Anim.scaleY =2.25;
+				explosion2Anim.gotoAndStop(0);
+
+				var explosion3 = new Pic("explosion3.png");
+				var colsExp3 =6;
+				var rowsExp3 = 1;
+				explosion3.cache(0,0,explosion3.width,explosion3.height);
+				var explosion3Anim = new Sprite(explosion3,colsExp3,rowsExp3);
+				explosion3Anim.scaleX = explosion3Anim.scaleY =2.25;
+				explosion3Anim.gotoAndStop(0);
+
+				goAgain.on("click", ()=> {
+					mistakesArray.splice(0,mistakesArray.length);
+					mistakeLabel.text="";
+					me109DnLabel.text="";
+					finalScoreLabel.text="";
+					mathsContainer.visible=false;
+					scoreContainer.visible=false;
+					uiContainer.visible=false;
+					menuContainer.visible=true;
+					timerContainer.visible=false;
+					scoreNum=0;
+					scoreDialLabel.text=scoreNum;
+					qNum=0;
+					for(var i=0; i<carrotArray.length; i++){
+						carrotArray[i].alpha=.1;
+					}
+					for(var t=0; t<blimpTextArray.length; t++){
+						blimpContainer.removeChild(blimpTextArray[t]);
+					}
+					stage.update();
+				});
+
+				function addBlimps(){
+					var rndBlimp= blimp.clone();
+					rndBlimp.y=zim.rand(0,245);
+					var topItem=blimpContainer.numChildren-1;
+					var tempObj=blimpContainer.getChildAt(topItem);
+					var targetX=0-rndBlimp.width;
+
+					if(topItem>-1){
+						rndBlimp.x=tempObj.x+zim.rand(800,1450); // is this time?
+					}else{
+						rndBlimp.x=0;
+					}
+					rndBlimp.myText=null;
+					if(mistakesArray.length>0){
+						var tempBlimpText=blimpMistakeText.clone();
+						var mistakeNum=zim.rand(0,mistakesArray.length-1);
+						var correctMistake=mistakesArray[mistakeNum][0]*mistakesArray[mistakeNum][1];
+						tempBlimpText.text=	mistakesArray[mistakeNum][0]+" × "+mistakesArray[mistakeNum][1]+" = "+correctMistake;
+						tempBlimpText.cache(-25,-25,tempBlimpText.width+25,tempBlimpText.height+25);
+						tempBlimpText.myBlimp=rndBlimp;
+						blimpTextArray.push(tempBlimpText);
+						rndBlimp.myText=tempBlimpText;
+					}
+
+					//rndBG.y=bgY;
+					blimpContainer.addChild(rndBlimp);
+					blimpContainer.addChild(tempBlimpText);
+					rndBlimp.animate({
+					   props:{x:targetX},
+					   time:(Math.floor((targetX*-1)+rndBlimp.x)/100)*2450,
+						 ease:"linear",
+						 call:function(){
+							 if(rndBlimp.myText!==null){
+								 blimpContainer.removeChild(rndBlimp.myText);
+							 };
+							 var tempRemoved=blimpContainer.getChildAt(0);
+							 tempRemoved=null;
+							 blimpContainer.removeChildAt(0);
+							 //zog(blimpTextArray.length);
+							 addBlimps();
+							 //resetBlimp();
+							 S.update();
+						 },
+						 params:rndBlimp
+					});
+					S.update();
+				}
+
+
+				function addBG(){
+					var rndBG= bgArray[zim.rand(0,bgArray.length-1)].clone();
+					var topItem=bgContainer.numChildren-1;
+					var tempObj=bgContainer.getChildAt(topItem);
+					var targetX=0-rndBG.width;
+					if(topItem>-1){
+						rndBG.x=tempObj.x+tempObj.width-10;
+					}else{
+						rndBG.x=0;
+					}
+					//rndBG.y=bgY;
+					bgContainer.addChild(rndBG);
+					rndBG.animate({
+					   props:{x:targetX},
+					   time:(Math.floor((targetX*-1)+rndBG.x)/100)*3000,
+						 ease:"linear",
+						 call:function(){
+							 bgContainer.removeChild(bgContainer.getChildAt(0));
+							 addBG();
+							 S.update();
+						 }
+					});
+					stage.update();
+				};
+				function addHouses(){
+					var rndHouse= hseArray[zim.rand(0,hseArray.length-1)].clone();
+					var topItem=buildingContainer.numChildren-1;
+					var tempObj=buildingContainer.getChildAt(topItem);
+					var targetX=0-rndHouse.width;
+					if(topItem>-1){
+						rndHouse.x=tempObj.x+tempObj.width+zim.rand(10,150);
+					}else{
+						rndHouse.x=0;
+					}
+					buildingContainer.addChild(rndHouse);
+					rndHouse.animate({
+					   props:{x:targetX},
+					   time:(Math.floor((targetX*-1)+rndHouse.x)/100)*1000,
+						 ease:"linear",
+						 call:function(){
+							 buildingContainer.removeChild(buildingContainer.getChildAt(0));
+							 addHouses();
+							 S.update();
+						 }
+					});
+					S.update();
+				};
+
+				function addTrees(){
+					var rndTree= treeArray[zim.rand(0,treeArray.length-1)].clone();
+					var topItem=treeContainer.numChildren-1;
+					var tempObj=treeContainer.getChildAt(topItem);
+					var targetX=0-rndTree.width;
+					if(topItem>-1){
+						rndTree.x=tempObj.x+tempObj.width+zim.rand(45,745);
+					}else{
+						rndTree.x=0;
+					}
+					treeContainer.addChild(rndTree);
+					rndTree.animate({
+					   props:{x:targetX},
+					   time:(Math.floor((targetX*-1)+rndTree.x)/100)*1000,
+						 ease:"linear",
+						 call:function(){
+							 treeContainer.removeChild(treeContainer.getChildAt(0));
+							 addTrees();
+							 S.update();
+						 }
+					});
+					S.update();
+				};
+
+				for(var i=0; i<2;i++){
+					addBlimps();
+				};
+
+				for(var i=0; i<5;i++){
+					addBG();
+				};
+
+				for(var i=0; i<5;i++){
+					addHouses();
+				};
+
+				for(var i=0; i<5;i++){
+					addTrees();
+				};
+
+				fireUp.on("mousedown", function() {
+					fireUp.visible=false;
+					if(gameRunning==true){
+						fireBullet();
+					}
+					S.update();
+				});
+				fireUp.on("pressup", function() {
+					fireUp.visible=true;
+					S.update();
+				});
+
+
+
+				controlColumn.on("pressup", function() {
+					if(gameRunning){
+						controlColumn.animate({x:1100, y:440}, 500,"elasticOut");
+						pressing=false;
+						if(animatingFlag==false){
+							var rollDir=zim.rand(0,10);
+							if(rollDir<5){
+								spitfireAnim.run({	label:[{label:"rollRight"}],loop:false,time:450 ,call:function(){
+									animatingFlag=false;
+									spitfireAnim.gotoAndStop(0);
+								}});
+							}else{
+								spitfireAnim.run({	label:[{label:"rollLeft"}],loop:false,time:450 ,call:function(){
+									animatingFlag=false;
+									spitfireAnim.gotoAndStop(0);
+								}});
+							}
+							animatingFlag=true;
+						};
+					}
+
+				});
+				controlColumn.on("pressmove", function() {
+					if(gameRunning){
+						pressing=true;
+					};
+				});
+				function testSteering(){
+					if(gameRunning){
+							if((pressing==true)&&(engineRunning==true)){
+								var stepX=controlColumn.x-1100; // var added by Karel Rosseel
+								var stepY=controlColumn.y-440; // var added by Karel Rosseel
+								var dx=Math.sqrt((stepX*=stepX)+(stepY*=stepY))/xDamp; //var added by Karel
+								var dy=Math.sqrt((stepX*=stepX)+(stepY*=stepY))/yDamp; //var added by Karel
+								var turn =((Math.atan2(stepX,stepY))/(Math.PI/180)+90); // var added by Karel
+
+								if(controlColumn.x<1100){
+										if(spitfireAnim.x>1100){
+											spitfireAnim.x=1100;
+										};
+										if(spitfireAnim.x<100){
+											spitfireAnim.x=100;
+										};
+										spitfireAnim.x += (Math.cos(turn*(Math.PI/180))*(controlColumn.x/8))/divNum;
+										if(controlColumn.y<440){
+											if(spitfireAnim.y>-35){
+												spitfireAnim.y -= (Math.sin(turn*(Math.PI/180))*(controlColumn.x/8))/divNum;
+											};
+										}else{
+											if(spitfireAnim.y<540){
+												spitfireAnim.y += (Math.sin(turn*(Math.PI/180))*(controlColumn.x/8))/divNum;
+											};
+										};
+								}else{
+
+										if(spitfireAnim.x>1100){
+											spitfireAnim.x=1100;
+										}
+										if(spitfireAnim.x<100){
+											spitfireAnim.x=100;
+										}
+										spitfireAnim.x -= (Math.cos(turn*(Math.PI/180))*(controlColumn.x/8))/divNum;
+										if(controlColumn.y<440){
+											//spitfireAnim.rotation=-35;
+											if(spitfireAnim.y>0){
+												spitfireAnim.y -= (Math.sin(turn*(Math.PI/180))*(controlColumn.x/8))/divNum;
+											}
+										}else{
+											if(spitfireAnim.y<540){
+												//spitfireAnim.rotation=35;
+												spitfireAnim.y += (Math.sin(turn*(Math.PI/180))*(controlColumn.x/8))/divNum;
+											};
+										};
+									};
+									};
+								};
+						};
+						function fireBullet(){
+							if(bulletsLeft>0){
+								frame.asset("bullet").play();
+								var tempBullet=carrotBullet.clone();
+								tempBullet.name="bullet"+bulletNum;
+								tempBullet.x=spitfireAnim.x;
+								tempBullet.y=spitfireAnim.y+25;
+								bulletContainer.addChild(tempBullet);
+								tempBullet.animate({
+								   props:{x:1300},
+								   time:1.000, // 1000 milliseconds
+									 ease:"quadOut",
+									 call:removeBullet,
+									 params:[tempBullet,bulletNum]
+								});
+								bulletArray.push(tempBullet);   /// need to splice the old bullet
+								bulletNum++;
+								bulletsLeft--;
+								bulletDialLabel.text=bulletsLeft;
+								endOfBulletsCalled=false;
+								S.update();
+							}else{
+								if(endOfBulletsCalled==false){
+									timeout(3.000,handleEndOfBullets); // 3000 milliseconds
+									endOfBulletsCalled=true;
+								}
+							}
+						}
+						function handleEndOfBullets(){
+							if(calcNum<21){
+								mathsContainer.visible=true;
+								if(gameRunning==true){
+									stopGame();
+									gameRunning=false;
+									mathsContainer.visible=true;
+									endOfBulletsCalled=false;
+								}
+							}else{
+								endOfBulletsCalled=false;
+								clearTickers();
+								//stopGame();
+								stopEndOfGame();
+								// for(var i=0;i<bulletArray.length; i++){
+								// 	bulletContainer.removeChild(bulletArray[i]);
+								// 	bulletArray[i]=null;
+								// }
+								gameRunning=false;
+								uiContainer.visible=false;
+								mathsContainer.visible=false;
+								showScoreBoard();
+							}
+						}
+						function removeBullet([thisBullet,thisNum]){
+							for(var i=bulletArray.length-1; i>-1; i--){
+								if(bulletArray[i].name==thisBullet.name){
+									//zog("removed: "+bulletArray[i].name);
+									bulletArray.splice(i,1);
+									bulletContainer.removeChild(thisBullet);
+								}
+							}
+							S.update();
+						}
+						function removeExplo(thisExp){
+							planeContainer.removeChild(thisExp);
+							S.update();
+						}
+						function checkForHits(){
+							for(var i=0; i<bulletArray.length; i++){
+									var tempB=bulletArray[i];
+									if((tempB.hitTestBounds(me109Anim))&&(tempB.visible==true)){
+													me109Anim.health-=bulletStrength;
+												if(me109Anim.health>0){
+													healthRect.scaleX=me109Anim.health/100;
+												}else{
+													healthRect.scaleX=0;
+												}
+
+												if(me109Anim.health>60){
+													healthRect.color="#24ce30";
+												}else if((me109Anim.health>49)&&(me109Anim.health<61)){
+													healthRect.color="#ffff00";
+												}else if((me109Anim.health>25)&&(me109Anim.health<50)){
+													healthRect.color="#efad29";
+												}else{
+													healthRect.color="#ff0000";
+												}
+												if(me109Anim.health<5){
+													if(me109Anim.available==true){
+														me109Anim.available=false;
+														crashPlane(me109Anim,me109Anim.x,1);
+														parachuteGo(me109Anim);
+														setSmoke(me109Anim);
+													}
+												}
+												//bulletContainer.removeChild(tempB);
+												tempB.visible=false;
+												if(me109Anim.available==true){
+															var rndExp=zim.rand(0,2);
+															if(rndExp==0){
+																var tempExp=explosion1Anim.clone();
+															}else if(rndExp==1){
+																var tempExp=explosion2Anim.clone();
+															}else{
+																var tempExp=explosion3Anim.clone();
+															}
+															tempExp.x=me109Anim.x-145;
+															tempExp.y=me109Anim.y-145;
+															tempExp.run({
+																time:.745, // 745 milliseconds
+																call:removeExplo,
+																params:tempExp
+															});
+
+															planeContainer.addChild(tempExp);
+												}
+										}
+										//////////////////////
+										if((tempB.hitTestBounds(me109Anim2))&&(tempB.visible==true)){
+														me109Anim2.health-=bulletStrength;
+													if(me109Anim2.health>0){
+														healthRect2.scaleX=me109Anim2.health/100;
+													}else{
+														healthRect2.scaleX=0;
+													}
+
+													if(me109Anim2.health>60){
+														healthRect2.color="#24ce30";
+													}else if((me109Anim2.health>49)&&(me109Anim2.health<61)){
+														healthRect2.color="#ffff00";
+													}else if((me109Anim2.health>25)&&(me109Anim2.health<50)){
+														healthRect2.color="#efad29";
+													}else{
+														healthRect2.color="#ff0000";
+													}
+													if(me109Anim2.health<5){
+														if(me109Anim2.available==true){
+															me109Anim2.available=false;
+															crashPlane(me109Anim2,me109Anim2.x,2);
+															parachuteGo(me109Anim2);
+															setSmoke(me109Anim2);
+														}
+													}
+													//bulletContainer.removeChild(tempB);
+													//tempB.visible=false;
+													if(me109Anim2.available==true){
+																var rndExp=zim.rand(0,2);
+																if(rndExp==0){
+																	var tempExp=explosion1Anim.clone();
+																}else if(rndExp==1){
+																	var tempExp=explosion2Anim.clone();
+																}else{
+																	var tempExp=explosion3Anim.clone();
+																}
+																tempExp.x=me109Anim2.x-145;
+																tempExp.y=me109Anim2.y-145;
+																tempExp.run({
+																	time:.745, // 745 milliseconds
+																	call:removeExplo,
+																	params:tempExp
+																});
+																planeContainer.addChild(tempExp);
+													}
+											}
+											//////////////////////
+											if((tempB.hitTestBounds(me109Anim3))&&(tempB.visible==true)){
+															me109Anim3.health-=bulletStrength;
+														if(me109Anim3.health>0){
+															healthRect3.scaleX=me109Anim3.health/100;
+														}else{
+															healthRect3.scaleX=0;
+														}
+
+														if(me109Anim3.health>60){
+															healthRect3.color="#24ce30";
+														}else if((me109Anim3.health>49)&&(me109Anim3.health<61)){
+															healthRect3.color="#ffff00";
+														}else if((me109Anim3.health>25)&&(me109Anim3.health<50)){
+															healthRect3.color="#efad29";
+														}else{
+															healthRect3.color="#ff0000";
+														}
+														if(me109Anim3.health<5){
+															if(me109Anim3.available==true){
+																me109Anim3.available=false;
+																crashPlane(me109Anim3,me109Anim3.x,3);
+																parachuteGo(me109Anim3);
+																setSmoke(me109Anim3);
+															}
+														}
+														//bulletContainer.removeChild(tempB);
+														tempB.visible=false;
+														if(me109Anim3.available==true){
+																	var rndExp=zim.rand(0,2);
+																	if(rndExp==0){
+																		var tempExp=explosion1Anim.clone();
+																	}else if(rndExp==1){
+																		var tempExp=explosion2Anim.clone();
+																	}else{
+																		var tempExp=explosion3Anim.clone();
+																	}
+																	tempExp.x=me109Anim3.x-145;
+																	tempExp.y=me109Anim3.y-145;
+																	tempExp.run({
+																		time:.745, // 745 milliseconds
+																		call:removeExplo,
+																		params:tempExp
+																	});
+																	planeContainer.addChild(tempExp);
+														}
+												}
+							}
+
+						}
+						frame.on("keydown", function(e) {
+							// if(e.keyCode==32) {
+							//    fireBullet();
+							// }else if
+							switch(e.keyCode) {
+									  case 32:
+									    fireBullet();
+									    break;
+									  case 49:
+									    pressKey(1);
+									    break;
+										case 50:
+									    pressKey(2);
+									    break;
+										case 51:
+									    pressKey(3);
+									    break;
+										case 52:
+									    pressKey(4);
+									    break;
+										case 53:
+									    pressKey(5);
+									    break;
+										case 54:
+									    pressKey(6);
+									    break;
+										case 55:
+									    pressKey(7);
+									    break;
+										case 56:
+									    pressKey(8);
+									    break;
+										case 57:
+									    pressKey(9);
+									    break;
+										case 8:
+									    pressKey(10); //backspace
+									    break;
+										case 48:
+										  pressKey(0); //0
+										  break;
+										case 13:
+											if((mathsContainer.visible==true)&&(timerContainer.visible==false)){
+												stepTimer.clear();
+												sixSeconds.clear();
+										    submitAnswer(myAnswer); //enter
+												new Aud("clickSnd").play();
+											}
+
+									    break;
+									  default:
+									    fireBullet();
+								}
+						});
+						function pressKey(selectedNum){
+							new Aud("clickSnd").play();
+							if((selectedNum<10)&&(selectedNum>0)){
+								myAnswer*=10;
+								myAnswer+=selectedNum;
+								mathsAnswerLabel.text=myAnswer;
+							}else if(selectedNum==0){
+								myAnswer*=10;
+								mathsAnswerLabel.text=myAnswer;
+							}else if(selectedNum==10){
+								var tempAnswer=Math.floor(myAnswer/10);
+								myAnswer=tempAnswer;
+								mathsAnswerLabel.text=myAnswer;
+							}
+							S.update();
+						}
+						function setSmoke(thisPlane){
+							if(thisPlane.myNum==1){
+								var tempObj=me109Anim;
+							}else if(thisPlane.myNum==2){
+								var tempObj=me109Anim2;
+							}else{
+								var tempObj=me109Anim3;
+							}
+							interval(50,function(thisPlane){
+								var tempNum=zim.rand(0,2);
+								if(tempNum==0){
+									var tempSmoke=smoke1.clone();
+								}else if(tempNum==1){
+									var tempSmoke=smoke2.clone();
+								}else{
+									var tempSmoke=smoke3.clone();
+								}
+
+								tempSmoke.x=tempObj.x+(zim.rand(0,30));
+								tempSmoke.y=tempObj.y;
+								planeContainer.addChild(tempSmoke);
+								tempSmoke.animate({
+								   props:{scale:.75, alpha:.1,rotation:zim.rand(0,359)},
+								   time:3, // 3000 milliseconds
+									 ease:"linear",
+									 call:function(){
+										 planeContainer.removeChild(tempSmoke);
+										 S.update();
+									 }
+								});
+							},35);
+						}
+
+						function parachuteGo(thisPlane){
+							var tempPara=parachute.clone();
+							tempPara.x=thisPlane.x;
+							tempPara.y=thisPlane.y-75;
+							tempPara.visible=true;
+							planeContainer.addChild(tempPara);
+							tempPara.animate({
+								 props:{x:thisPlane.x,y:550},
+								 time:3.450, // 3450 milliseconds
+								 ease:"linear",
+								 call:removePara,
+								 params:tempPara
+							});
+						}
+						function removePara(thisPara){
+							planeContainer.removeChild(thisPara);
+							stage.update();
+						}
+						function crashPlane(thisPlane, thisX, whichFox){
+							scoreNum++;
+							scoreDialLabel.text=scoreNum;
+
+							if(whichFox==1){
+								foxHead.visible=false;
+							}else if(whichFox==2){
+								foxHead2.visible=false;
+							}else{
+								foxHead3.visible=false;
+							}
+							var randCrash= zim.rand(0,3);
+							if(randCrash==0){
+								thisPlane.run({	label:[{label:"rollOver1"}],loop:false,time:450 })
+								.animate({
+									 props:{x:thisX-245,y:550,rotation:-45},
+									 time:2.850, // 2850 milliseconds
+									 ease:"linear",
+									 call:removePlane,
+									 params:thisPlane
+								});
+							}else if(randCrash==1){
+								thisPlane.run({	label:[{label:"rollOver2"}],loop:false,time:450 })
+								.animate({
+									 props:{x:thisX-245,y:550,rotation:-45},
+									 time:2.850, // 2850 milliseconds
+									 ease:"linear",
+									 call:removePlane,
+									 params:thisPlane
+								});
+							}else if(randCrash==2){
+								thisPlane.run({	label:[{label:"rollRight"}],loop:false,time:450 })
+								.animate({
+									 props:{x:thisX-245,y:550,rotation:-45},
+									 time:2.850, // 2850 milliseconds
+									 ease:"linear",
+									 call:removePlane,
+									 params:thisPlane
+								});
+							}else{
+								thisPlane.run({	label:[{label:"rollLeft"}],loop:false,time:450 })
+								.animate({
+									 props:{x:thisX-245,y:550,rotation:-45},
+									 time:2.850, // 2850 milliseconds
+									 ease:"linear",
+									 call:removePlane,
+									 params:thisPlane
+								});
+							}
+							stage.update();
+						}
+						function removePlane(thisPlane){
+							var randExplo=zim.rand(0,1);
+							if(randExplo==0){
+								new Aud("explosion").play();
+							}else{
+								new Aud("explosion2").play();
+							}
+
+							var rndExp=zim.rand(0,2);
+							if(rndExp==0){
+								var tempExp=explosion1Anim.clone();
+							}else if(rndExp==1){
+								var tempExp=explosion2Anim.clone();
+							}else{
+								var tempExp=explosion3Anim.clone();
+							}
+							tempExp.x=thisPlane.x-145;
+							tempExp.y=thisPlane.y-145;
+							tempExp.run({
+								time:.745, // 745 milliseconds
+								call:removeExplo,
+								params:tempExp
+							});
+							planeContainer.addChild(tempExp);
+							thisPlane.available=true;
+							thisPlane.x=zim.rand(1250,2500);
+							thisPlane.health=100;
+							thisPlane.myFox.visible=true;
+							thisPlane.y=zim.rand(0,365)+35;
+							//healthRect.scaleX=1;
+							thisPlane.myHealthBar.scaleX=1;
+							thisPlane.myHealthBar.color="#24ce30";
+							//healthRect.color="#24ce30";
+							thisPlane.rotation=0;
+							thisPlane.health=100;
+							thisPlane.gotoAndStop(0);
+						}
+						function moveHealthBarBG(){
+							if(gameRunning){
+								healthBarBG.x=me109Anim.x+10;
+			 	 			 	healthBarBG.y=me109Anim.y+30;
+								healthRect.x=healthBarBG.x+9;
+								healthRect.y=healthBarBG.y+9;
+
+								healthBar2BG.x=me109Anim2.x+10;
+			 	 			 	healthBar2BG.y=me109Anim2.y+30;
+								healthRect2.x=healthBar2BG.x+9;
+								healthRect2.y=healthBar2BG.y+9;
+
+								healthBar3BG.x=me109Anim3.x+10;
+			 	 			 	healthBar3BG.y=me109Anim3.y+30;
+								healthRect3.x=healthBar3BG.x+9;
+								healthRect3.y=healthBar3BG.y+9;
+								if(blimpTextArray.length>0){
+									for(var i=0; i<blimpTextArray.length; i++){
+										if(blimpTextArray[i].myBlimp!=null){
+											blimpTextArray[i].x=blimpTextArray[i].myBlimp.x+10;
+											blimpTextArray[i].y=blimpTextArray[i].myBlimp.y+50;
+										}
+									}
+								}
+							}
+						}
+						function moveEnemy(){
+								if(gameRunning){
+											if(me109Anim.x>-100){
+												me109Anim.x-=2;
+											}else{
+												me109Anim.x=zim.rand(1250,2500);
+												me109Anim.health=100;
+												me109Anim.y=zim.rand(0,365)+35;
+												healthRect.scaleX=1;
+												healthRect.color="#24ce30";
+											};
+											foxHead.x=me109Anim.x-25;
+											foxHead.y=me109Anim.y-55;
+											/////////////////////////////
+											if(me109Anim2.x>-100){
+												me109Anim2.x-=2;
+											}else{
+												me109Anim2.x=zim.rand(1250,2500);
+												me109Anim2.health=100;
+												me109Anim2.y=zim.rand(0,365)+35;
+												healthRect2.scaleX=1;
+												healthRect2.color="#24ce30";
+											};
+											foxHead2.x=me109Anim2.x-25;
+											foxHead2.y=me109Anim2.y-55;
+											/////////////////////////////
+											if(me109Anim3.x>-100){
+												me109Anim3.x-=2;
+											}else{
+												me109Anim3.x=zim.rand(1250,2500);
+												me109Anim3.health=100;
+												me109Anim3.y=zim.rand(0,365)+35;
+												healthRect3.scaleX=1;
+												healthRect3.color="#24ce30";
+											};
+											foxHead3.x=me109Anim3.x-25;
+											foxHead3.y=me109Anim3.y-55;
+							};
+					};
+					function setNumbers(){
+						currentArray.splice(0,currentArray.length);
+						var whichSet=0
+						if(ageGroup==0){
+							whichSet=zim.rand(0,allKS1TablesArray.length-1);
+							currentArray=copy(allKS1TablesArray[whichSet]);
+						}else{
+							whichSet=zim.rand(0,allTablesArray.length-1);
+							currentArray=copy(allTablesArray[whichSet]);
+						}
+						//zog("whichSet: "+whichSet);
+						shuffle(currentArray);
+					}
+					function nextFact(){
+						myAnswer=0;
+						mathsFactLabel.text="";
+						mathsAnswerLabel.text="";
+						timeNum=6;
+						timeNumLabel.text=timeNum;
+						if(calcNum<25){
+							correctAnswer=currentArray[calcNum];
+							//zog("calcNum: "+calcNum);
+							calcCorrectAnswer=correctAnswer[0]*correctAnswer[1];
+							mathsFactLabel.text=correctAnswer[0]+" × "+correctAnswer[1]+" =";
+						}
+
+						//calcNum++;
+						stepTimer=interval(1.000,stepDnTime,6); //1000 milliseconds
+						sixSeconds=timeout(6.000,timesUp); // 6000 milliseconds
+
+						if(qNum<5){
+							carrotArray[qNum].alpha=1;
+							qNum++
+						}else{
+							if(stepTimer){
+								stepTimer.clear();
+							}
+							if(roundelTimer){
+								roundelTimer.clear();
+							}
+							if(sixSeconds){
+								sixSeconds.clear();
+							}
+							if(submitTimer){
+								submitTimer.clear();
+							}
+							mathsContainer.visible=false;
+							uiContainer.visible=true;
+							timerContainer.visible=false;
+							if(bulletsLeft<10){
+								bulletsLeft=5;
+							}
+							for(var f=0; f<carrotArray.length; f++){
+								carrotArray[f].alpha=.1;
+								qNum=0;
+							}
+							restartGame();
+						};
+						S.update();
+					}
+					function stepDnTime(){
+						if(timeNum>0){
+							timeNum--;
+							timeNumLabel.text=timeNum;
+						}
+						S.update();
+					}
+					function timesUp(){
+						stepTimer.clear();
+						sixSeconds.clear();
+						submitAnswer(myAnswer);
+						//showTimer();
+						S.update();
+					}
+					function submitAnswer(myNumber){
+						//if(calcNum<25){
+							if(roundelTimer){
+								roundelTimer.clear();
+								submitTimer.clear();
+							};
+							if(myNumber==calcCorrectAnswer){
+								//zog("correct");
+								bulletsLeft+=10;
+								bulletDialLabel.text=bulletsLeft;
+							}else{
+								//zog("wrong");
+								mistakesArray.push(correctAnswer);
+							};
+							myAnswer=0;
+							mathsFactLabel.text="";
+							mathsAnswerLabel.text="";
+							//if(qNum<5){
+								showTimer(false);
+							//}
+						S.update();
+					};
+					function showScoreBoard(){
+						//zog("mistakesArray: "+mistakesArray);
+						mathsContainer.visible=false;
+						scoreContainer.visible=true;
+						mistakesArray.sort();
+						if(mistakesArray.length>10){
+							mistakeLabel.size=25;
+						}else{
+							mistakeLabel.size=45;
+						}
+						mistakeLabel.text="";
+						for(var i=0; i<mistakesArray.length; i++){
+							mistakeLabel.text+=mistakesArray[i][0]+" × "+mistakesArray[i][1]+" = "+mistakesArray[i][0]*mistakesArray[i][1]+"\n";
+						}
+						me109DnLabel.text=scoreNum;
+						finalScoreLabel.text=25-mistakesArray.length;
+						S.update();
+					}
+					function showTimer(gameEndFlag){
+						if(menuContainer.visible==false){
+							roundel.alpha=1;
+							roundel2.alpha=1;
+							roundel3.alpha=1;
+							timerContainer.visible=true;
+							mathsContainer.visible=false;
+							roundelNum=0;
+
+							if(gameEndFlag==false){
+								calcNum++;
+							}
+							if(calcNum<5){
+								letsGo.visible=false;
+								take5.visible=false;
+							}else if((calcNum==5)||(calcNum==10)||(calcNum==15)||(calcNum==20)){
+								letsGo.visible=true;
+								take5.visible=false;
+							}else {
+								letsGo.visible=false;
+								take5.visible=false;
+							}
+							if(calcNum<26){
+								submitTimer=timeout(3,nextFact); // 3000 millseconds
+								roundelTimer=interval(.75,hideRoundel,4); // 750 milliseconds by Karelroundeltime
+							}
+							// else{
+							// 	showScoreBoard();
+							// 	stopEndOfGame();
+							// 	//stopGame();
+							// }
+						}
+						S.update();
+					};
+					function clearTickers(){
+						Ticker.remove(testSteering);
+						Ticker.remove(checkForHits);
+						Ticker.remove(moveHealthBarBG);
+						Ticker.remove(moveEnemy);
+					}
+					function hideRoundel(){
+						if(roundelNum<3){
+							roundelArray[roundelNum].alpha=.25;
+
+						}else{
+							mathScoreLabel.text= "questions answered: "+(calcNum+1)+" / 25",
+							timerContainer.visible=false;
+							mathsContainer.visible=true;
+							roundel.alpha=1;
+							roundel2.alpha=1;
+							roundel3.alpha=1;
+						}
+						roundelNum++;
+						S.update();
+					}
+
+					function restartGame(){
+						bulletDialLabel.text=bulletsLeft;
+						gameRunning=true;
+						pauseAnimate(false);
+						new Aud("engine").play();
+						engineInterval=interval(4.000,engineNoise); //4000 milliseconds
+						S.update();
+					}
+					function engineNoise(){
+						//new Aud("engine").stop();
+						engineNoiseRunning= new Aud("engine").play();
+					}
+					function stopGame(){
+						timeNum=6;
+						timeNumLabel.text=timeNum;
+						bulletsLeft=0;
+						//calcNum=0;
+						gameRunning=false;
+						if(engineNoiseRunning){
+							engineNoiseRunning.stop();
+						}
+						if(engineInterval){
+							engineInterval.clear();
+						}
+
+
+						timerContainer.visible=false;
+						//mistakesArray.splice(0,mistakesArray.length);
+						pauseAnimate();
+						//setNumbers();
+						showTimer(true);
+						letsGo.visible=false;
+						take5.visible=true;
+						//nextFact();
+					}
+					function stopEndOfGame(){
+						//zog("stopEndOfGame");
+						timeNum=6;
+						timeNumLabel.text=timeNum;
+						bulletsLeft=0;
+						gameRunning=false;
+						engineNoiseRunning.stop();
+						engineInterval.clear();
+						timerContainer.visible=false;
+						//pauseAnimate();
+						timeout(3.000,pauseAnimate); //3000 milliseconds
+						showTimer(true);
+						letsGo.visible=false;
+						take5.visible=false;
+					}
+
+
+
+
+
+
+
+
+						// //// debug information /////////////////
+						//
+						//
+						// var blimpLabel = new Label({
+						//    text:"blimpContainer: ",
+						//    size:16,
+						//    font:"courier",
+						//    color:"white",
+						// 	 align:"left"
+						// });
+						// var blimpNum = new Label({
+						//    text:blimpContainer.numChildren,
+						//    size:16,
+						//    font:"courier",
+						//    color:"white",
+						// 	 align:"left"
+						// });
+						// blimpLabel.x=5;
+						// blimpLabel.y=5;
+						// blimpNum.x=blimpLabel.x+blimpLabel.width;
+						// blimpNum.y=blimpLabel.y;
+						// menuContainer.addChild(blimpLabel);
+						// menuContainer.addChild(blimpNum);
+						//
+						// buildinCoLabel=blimpLabel.clone();
+						// buildNum=blimpLabel.clone();
+						// buildinCoLabel.text="buildingContainer: ";
+						// buildNum.text=buildingContainer.numChildren;
+						// buildinCoLabel.x=5;
+						// buildinCoLabel.y=25;
+						// buildNum.x=buildinCoLabel.x+buildinCoLabel.width;
+						// buildNum.y=buildinCoLabel.y;
+						// menuContainer.addChild(buildinCoLabel);
+						// menuContainer.addChild(buildNum);
+						//
+						// treeContLabel=blimpLabel.clone();
+						// treeNum=blimpLabel.clone();
+						// treeContLabel.text="treeContainer: ";
+						// treeNum.text=treeContainer.numChildren;
+						// treeContLabel.x=5;
+						// treeContLabel.y=45;
+						// treeNum.x=treeContLabel.x+treeContLabel.width;
+						// treeNum.y=treeContLabel.y;
+						// menuContainer.addChild(treeContLabel);
+						// menuContainer.addChild(treeNum);
+						//
+						// bulletContLabel=blimpLabel.clone();
+						// bulletLabel=blimpLabel.clone();
+						// bulletContLabel.text="bulletContainer: ";
+						// bulletLabel.text=bulletContainer.numChildren;
+						// bulletContLabel.x=5;
+						// bulletContLabel.y=65;
+						// bulletLabel.x=bulletContLabel.x+bulletContLabel.width;
+						// bulletLabel.y=bulletContLabel.y;
+						// menuContainer.addChild(bulletContLabel);
+						// menuContainer.addChild(bulletLabel);
+						//
+						// uiContLabel=blimpLabel.clone();
+						// planeLabel=blimpLabel.clone();
+						// uiContLabel.text="planeContainer: ";
+						// planeLabel.text=planeContainer.numChildren;
+						// uiContLabel.x=5;
+						// uiContLabel.y=85;
+						// planeLabel.x=uiContLabel.x+uiContLabel.width;
+						// planeLabel.y=uiContLabel.y;
+						// menuContainer.addChild(uiContLabel);
+						// menuContainer.addChild(planeLabel);
+						//
+						// //var meter = new Meter(stage, "top", "right");
+						//
+						// function checkChildren(){
+						// 	blimpNum.text=blimpContainer.numChildren;
+						// 	buildNum.text=buildingContainer.numChildren;
+						// 	treeNum.text=treeContainer.numChildren;
+						// 	bulletLabel.text=bulletContainer.numChildren;
+						// 	planeLabel.text=planeContainer.numChildren;
+						// 	stage.update();
+						// }
+						// /// end of debug information ////////////////
+
+						function resetGame(){
+							mistakesArray.splice(0,mistakesArray.length);
+							blimpTextArray.splice(0,blimpTextArray.length);
+							numCorrectAns=0;
+							mathsContainer.visible=true;
+							uiContainer.visible=false;
+						}
+						year2But.on("click", function() {
+							ageGroup=0;
+							calcNum=0;
+							endOfBulletsCalled=false;
+							menuContainer.visible=false;
+							gameRunning=false;
+							setNumbers();
+							resetGame();
+							stopGame();
+							startTickers();
+
+							letsGo.visible=false;
+							take5.visible=false;
+							S.update();
+						});
+
+						year4But.on("click", function() {
+							ageGroup=1;
+							calcNum=0;
+							endOfBulletsCalled=false;
+							menuContainer.visible=false;
+							gameRunning=false;
+							setNumbers();
+							resetGame();
+							stopGame();
+							startTickers();
+							//setNumbers();
+							letsGo.visible=false;
+							take5.visible=false;
+							S.update();
+						});
+						function startTickers(){
+							Ticker.add(testSteering);
+							Ticker.add(checkForHits);
+							Ticker.add(moveHealthBarBG);
+							Ticker.add(moveEnemy);
+						}
+
+						// mistakesArray.splice(0,mistakesArray.length);
+						// blimpTextArray.splice(0,blimpTextArray.length);
+						// numCorrectAns=0;
+						// mathsContainer.visible=false;
+						// uiContainer.visible=false;
+						// //stopGame();
+						//resetGame();
+
+
+						//zim.Ticker.add(checkChildren);  /// debug information
+
+
+
+
+
+
+
+}) // end of F. on complete
+	
+}
+        </script>
+    </head>
+   <body>
+    
+   </body>
+</html>
